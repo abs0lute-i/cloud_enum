@@ -3,6 +3,7 @@ Helper functions for network requests, etc
 """
 
 import time
+import random
 import sys
 import datetime
 import re
@@ -173,8 +174,9 @@ def dns_lookup(nameserver, name):
         nameservers = read_nameservers(nameserverfile)
         res.nameservers = nameservers
     else:
-        res.nameservers = [nameserver]
-
+        nameserver_list = ["1.0.0.1", "1.1.1.1", "8.8.8.8", "8.8.4.4", "9.9.9.9"]
+        random.shuffle(nameserver_list)
+        res.nameservers = nameserver_list
     try:
         res.query(name)
         # If no exception is thrown, return the valid name
@@ -190,7 +192,9 @@ def dns_lookup(nameserver, name):
         return '-#BREAKOUT_DNS_ERROR#-'
     except dns.exception.Timeout:
         print(f"    [!] DNS Timeout on {name}. Investigate if there are many"
-              " of these.")
+              " of these. RETRYING")
+        time.sleep(1)
+        dns_lookup(nameserver, name)
         return ''
 
 
